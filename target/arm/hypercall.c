@@ -127,5 +127,6 @@ void hypervisor_patch_panic(CPUARMState *cpu_env, uint64_t virt_panic_handler_ad
 
 void hypervisor_handle_panic(CPUARMState *cpu_env) {
     qemu_log("Panic received\n");
-    // TODO: Recover operating system and log crash
+    // TODO: Log crash
+    exit(1337);
 }
