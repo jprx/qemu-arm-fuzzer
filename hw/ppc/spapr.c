@@ -3777,12 +3777,17 @@ void spapr_core_unplug_request(HotplugHandler *hotplug_dev, DeviceState *dev,
 
     if (!spapr_drc_unplug_requested(drc)) {
         spapr_drc_unplug_request(drc);
-        spapr_hotplug_req_remove_by_index(drc);
-    } else {
-        error_setg(errp, "core-id %d unplug is still pending, %d seconds "
-                   "timeout remaining",
-                   cc->core_id, spapr_drc_unplug_timeout_remaining_sec(drc));
     }
+
+    /*
+     * spapr_hotplug_req_remove_by_index is left unguarded, out of the
+     * "!spapr_drc_unplug_requested" check, to allow for multiple IRQ
+     * pulses removing the same CPU. Otherwise, in an failed hotunplug
+     * attempt (e.g. the kernel will refuse to remove the last online
+     * CPU), we will never attempt it again because unplug_requested
+     * will still be 'true' in that case.
+     */
+    spapr_hotplug_req_remove_by_index(drc);
 }
 
 int spapr_core_dt_populate(SpaprDrc *drc, SpaprMachineState *spapr,
@@ -4600,14 +4605,25 @@ static void spapr_machine_latest_class_options(MachineClass *mc)
     type_init(spapr_machine_register_##suffix)
 
 /*
- * pseries-6.0
+ * pseries-6.1
  */
-static void spapr_machine_6_0_class_options(MachineClass *mc)
+static void spapr_machine_6_1_class_options(MachineClass *mc)
 {
     /* Defaults for the latest behaviour inherited from the base class */
 }
 
-DEFINE_SPAPR_MACHINE(6_0, "6.0", true);
+DEFINE_SPAPR_MACHINE(6_1, "6.1", true);
+
+/*
+ * pseries-6.0
+ */
+static void spapr_machine_6_0_class_options(MachineClass *mc)
+{
+    spapr_machine_6_1_class_options(mc);
+    compat_props_add(mc->compat_props, hw_compat_6_0, hw_compat_6_0_len);
+}
+
+DEFINE_SPAPR_MACHINE(6_0, "6.0", false);
 
 /*
  * pseries-5.2
