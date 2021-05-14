@@ -41,9 +41,13 @@ void talk_to_server(char cmd, char *buf, size_t buf_len) {
         cmdbuf[0] = cmd;
         cmdbuf[1] = '\x00';
         int bytes_written = write(clientsocket, cmdbuf, sizeof(cmdbuf));
-        int bytes_read = read(clientsocket, buf, buf_len);
-        bytes_written = bytes_read + 1; // get compiler to stop complaining
-        bytes_read = bytes_written + 1; // get compiler to stop complaining
+
+        // Only read a response if we are expecting one
+        if (NULL != buf) {
+            int bytes_read = read(clientsocket, buf, buf_len);
+            bytes_written = bytes_read + 1; // get compiler to stop complaining
+            bytes_read = bytes_written + 1; // get compiler to stop complaining
+        }
     }
 
     close(clientsocket);
@@ -71,6 +75,14 @@ void test_crash(void) {
  */
 void test_pass_change(void) {
     talk_to_server('U', next_testcase, sizeof(next_testcase));
+}
+
+/*
+ * start_server_timer
+ * Tell the server to start a timer. We're in business, baby
+ */
+void start_server_timer(void) {
+    talk_to_server('S', NULL, 0);
 }
 
 /*

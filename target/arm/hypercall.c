@@ -33,6 +33,10 @@ void intercept_hypercall(CPUARMState *cpu_env) {
             complete_testcase();
         break;
 
+        case HYPERCALL_START_TIMER:
+            start_server_timer();
+        break;
+
         default:
             qemu_log("Undefined hypercall\n");
             break;

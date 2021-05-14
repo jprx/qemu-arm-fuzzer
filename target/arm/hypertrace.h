@@ -40,6 +40,12 @@ void test_crash(void);
 void test_pass_change(void);
 
 /*
+ * start_server_timer
+ * Tell the server to start a timer. We're in business, baby
+ */
+void start_server_timer(void);
+
+/*
  * complete_testcase
  * This current test is complete- we can compare what's in the trace buffer
  * with the previous state and decide accordingly what's up
